@@ -3,16 +3,21 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 function CharacterList({ characters, onSelectCharacter, selectedId }) {
   return (
     <div className="characters-list">
+      {characters.length === 0 && (
+        <p className="empty">No life forms found in this dimension.</p>
+      )}
       {characters.map((item) => (
         <Character
           key={item.id}
           item={item}
           onSelectCharacter={onSelectCharacter}
-          selectedId={selectedId}
+          selected={selectedId === item.id}
         >
           <button
-            className="icon red"
+            className="icon icon-btn"
             onClick={() => onSelectCharacter(item.id)}
+            aria-label={`${selectedId === item.id ? "Hide" : "Show"} ${item.name} details`}
+            aria-pressed={selectedId === item.id}
           >
             {selectedId === item.id ? <EyeSlashIcon /> : <EyeIcon />}
           </button>
@@ -24,10 +29,10 @@ function CharacterList({ characters, onSelectCharacter, selectedId }) {
 
 export default CharacterList;
 
-export function Character({ item, children }) {
+export function Character({ item, children, selected }) {
   return (
-    <div className="list__item">
-      <img src={item.image} alt={item.name} />
+    <div className={`list__item ${selected ? "list__item--selected" : ""}`}>
+      <img src={item.image} alt={item.name} loading="lazy" />
       <h3 className="name">
         <span>{item.gender === "Male" ? "👨" : "👱‍♀️"}</span>
         <span>{item.name}</span>

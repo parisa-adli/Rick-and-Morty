@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import CharacterDetail from "./components/CharacterDetail";
 import CharacterList from "./components/CharacterList";
@@ -20,6 +20,12 @@ function App() {
     query
   );
   const [selectedId, setSelectedId] = useState(null);
+  const listRef = useRef(null);
+
+  // bring results into view while searching; keyboard focus stays in the input
+  useEffect(() => {
+    if (query) listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [query]);
   const [favourite, setFavourite] = useLocalStorage("FAVOURITES", []);
 
   // const [count, setCount] = useState(0);
@@ -149,7 +155,16 @@ function App() {
   return (
     <div className="app">
       {/* <div style={{ color: "#FFF", marginBottom: "50rem" }}>{count}</div> */}
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          style: {
+            background: "var(--glass-strong)",
+            color: "var(--text)",
+            border: "1px solid var(--glass-border)",
+            backdropFilter: "blur(14px)",
+          },
+        }}
+      />
       {/* <button onClick={handleLoadCharacter} className="load-characters-btn">
         load just first "3" characters
       </button> */}
@@ -163,23 +178,38 @@ function App() {
           onDeleteFavourite={handleDeleteFvourite}
         />
       </Navbar>
+      <Hero found={characters.length} favourites={favourite.length} />
+      <div className="portal-divider" aria-hidden="true" />
       <Main>
-        {isLoading ? (
-          <div className="characters-list">
-            <Loader />
-          </div>
-        ) : (
-          <CharacterList
-            characters={characters}
-            onSelectCharacter={handleSelectCharacter}
+        <section ref={listRef} className="main__section" aria-labelledby="subjects-title">
+          <h2 id="subjects-title" className="section-title">
+            Scanned Subjects
+          </h2>
+          {isLoading ? (
+            <div className="characters-list">
+              <Loader />
+              {Array.from({ length: 5 }, (_, i) => (
+                <div key={i} className="list__item skeleton" aria-hidden="true" />
+              ))}
+            </div>
+          ) : (
+            <CharacterList
+              characters={characters}
+              onSelectCharacter={handleSelectCharacter}
+              selectedId={selectedId}
+            />
+          )}
+        </section>
+        <section aria-labelledby="dossier-title">
+          <h2 id="dossier-title" className="section-title">
+            Subject Dossier
+          </h2>
+          <CharacterDetail
             selectedId={selectedId}
+            onAddFavourite={handleAddFavourite}
+            isAddToFavourite={isAddToFavourite}
           />
-        )}
-        <CharacterDetail
-          selectedId={selectedId}
-          onAddFavourite={handleAddFavourite}
-          isAddToFavourite={isAddToFavourite}
-        />
+        </section>
       </Main>
     </div>
   );
@@ -187,5 +217,51 @@ function App() {
 export default App;
 
 function Main({ children }) {
-  return <div className="main">{children}</div>;
+  return <main className="main">{children}</main>;
+}
+
+function Hero({ found, favourites }) {
+  // parallax: write pointer offset (-0.5..0.5) to CSS vars, no re-render
+  const handleMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", (e.clientX - r.left) / r.width - 0.5);
+    e.currentTarget.style.setProperty("--my", (e.clientY - r.top) / r.height - 0.5);
+  };
+
+  return (
+    <header className="hero" onPointerMove={handleMove}>
+      <div>
+        <p className="hero__eyebrow">Dimension C-137 · Online</p>
+        <h1 className="hero__title">
+          Interdimensional
+          <span>Character Database</span>
+        </h1>
+        <p className="hero__text">
+          Scan the multiverse for every Rick, Morty and alien life form. Open a
+          dossier, track their episodes and keep your favourites close.
+        </p>
+        <div className="hero__stats">
+          <div className="stat">
+            <strong>{found}</strong>
+            <span>Subjects found</span>
+          </div>
+          <div className="stat">
+            <strong>{favourites}</strong>
+            <span>Favourites</span>
+          </div>
+        </div>
+      </div>
+      <div className="hero__visual" aria-hidden="true">
+        <span className="planet planet--a" />
+        <div className="portal">
+          <span className="portal__swirl" />
+          <span className="portal__streaks" />
+          <div className="portal__core">
+            <img src="https://rickandmortyapi.com/api/character/avatar/1.jpeg" alt="" />
+          </div>
+        </div>
+        <span className="planet planet--b" />
+      </div>
+    </header>
+  );
 }
