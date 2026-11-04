@@ -2,6 +2,8 @@
 
 This is a React application that uses the Rick and Morty API to display information about characters, episodes, and locations from the show.
 
+![Rick and Morty App](public/Rick-And-Morty.png)
+
 ## Features
 
 - Browse characters with detailed information.
