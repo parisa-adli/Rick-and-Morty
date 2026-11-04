@@ -36,20 +36,22 @@ function CharacterDetail({ selectedId, onAddFavourite, isAddToFavourite }) {
 
   if (isLoading)
     return (
-      <div style={{ flex: 1, color: "var(--slate-300)" }}>
+      <div>
         <Loader />
+        <div className="list__item skeleton" style={{ height: "18rem" }} />
       </div>
     );
 
   if (!character || !selectedId)
     return (
-      <div style={{ flex: 1, color: "var(--slate-300)" }}>
-        Please select a character
+      <div className="detail-empty">
+        <span className="detail-empty__portal" aria-hidden="true" />
+        <p>Please select a character to open their dossier.</p>
       </div>
     );
 
   return (
-    <div style={{ flex: "1" }}>
+    <div>
       <CharacterSubInfo
         character={character}
         onAddFavourite={onAddFavourite}
@@ -122,7 +124,11 @@ function EpisodeList({ episodes }) {
     <div className="character-episodes">
       <div className="title">
         <h2>List of Episodes:</h2>
-        <button onClick={() => setSortBy((is) => !is)}>
+        <button
+          className="icon-btn"
+          onClick={() => setSortBy((is) => !is)}
+          aria-label={`Sort episodes ${sortBy ? "newest" : "oldest"} first`}
+        >
           <ArrowUpCircleIcon
             className="icon"
             style={{ rotate: sortBy ? "0deg" : "180deg" }}
